@@ -20,6 +20,7 @@ volatile uint8_t  sendArrayFlag = 0;
 int16_t rotaryCounter = 0;  // min is 0 max is 906 -- default sent to center (actual 450)
 unsigned long lastLightChange = 0;
 uint8_t lightOn = 0;
+uint8_t serialDebugSendCounter = 0;
 
 void putByteInNextBuff(uint8_t *msgnum, uint8_t *temp);
 void sendArray(uint8_t*);
@@ -85,13 +86,26 @@ void sendLKASOffArray(){
 	Serialwrite(lkas_off_array[counterbit][1]);
 	Serialwrite(lkas_off_array[counterbit][2]);
 	Serialwrite(lkas_off_array[counterbit][3]);
+	if((serialDebugSendCounter % 31)== 0){
+		Serial.print("Start ");
+		Serial.print(lkas_off_array[counterbit][0], BIN);
+		Serial.print(" ");
+		Serial.print(lkas_off_array[counterbit][1], BIN);
+		Serial.print(" ");
+		Serial.print(lkas_off_array[counterbit][2], BIN);
+		Serial.print(" ");
+		Serial.println(lkas_off_array[counterbit][3], BIN);
+	}
+serialDebugSendCounter++;
+
 	counterbit = counterbit > 0 ? 0x00 : 0x01;
+	// Serial.println(rotaryCounter,DEC);
 }
 
 void sendLKASOnArray(){
 	uint8_t data[4];
 
-	data[0] = (counterbit << 5) | ((rotaryCounter >> 11) & 0x10) | ((rotaryCounter >> 5) & 0xF);
+	data[0] = (counterbit << 4) | ((rotaryCounter >> 12) & 0x8) | ((rotaryCounter >> 5) & 0xF);
 	data[1] = 0xA0 | (rotaryCounter & 0x1F);
 	data[2] =  0x80;
 	Serialwrite(data[0]);
@@ -100,6 +114,17 @@ void sendLKASOnArray(){
 	Serialwrite(data[2]);
  	data[3] = chksm(&total);
 	Serialwrite(data[3]);
+	if((serialDebugSendCounter % 31)== 0){
+		Serial.print("Start ");
+		Serial.print(data[0],BIN);
+		Serial.print(" ");
+		Serial.print(data[1],BIN);
+		Serial.print(" ");
+		Serial.print(data[2],BIN);
+		Serial.print(" ");
+		Serial.println(data[3],BIN);
+	}
+	serialDebugSendCounter++;
 	counterbit = counterbit > 0 ? 0x00 : 0x01;
 }
 
