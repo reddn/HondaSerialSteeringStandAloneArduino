@@ -45,7 +45,7 @@ void setup() {
 	// setupTimer1();
 	setupTimersOld();
 	sei();//allow interrupts
-	pinMode(7, INPUT);
+	pinMode(7, INPUT_PULLUP);
 	pinMode(13,OUTPUT);
 	digitalWrite(13,LOW);
 }
@@ -105,12 +105,12 @@ serialDebugSendCounter++;
 void sendLKASOnArray(){
 	uint8_t data[4];
 
-	data[0] = (counterbit << 4) | ((rotaryCounter >> 12) & 0x8) | ((rotaryCounter >> 5) & 0xF);
+	data[0] = (counterbit << 5) | ((rotaryCounter >> 12) & 0x8) | ((rotaryCounter >> 5) & 0xF);
 	data[1] = 0xA0 | (rotaryCounter & 0x1F);
 	data[2] =  0x80;
 	Serialwrite(data[0]);
 	Serialwrite(data[1]);
-	uint16_t total = data[0] + data[1] + data[2];
+	uint16_t total = data[0] + data[1] +   data[2];
 	Serialwrite(data[2]);
  	data[3] = chksm(&total);
 	Serialwrite(data[3]);
